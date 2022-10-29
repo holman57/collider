@@ -14,7 +14,7 @@ class Ball(context: Context, shapeId: Int?) : Sprite(context, shapeId) {
         val randomX: Double = min + Math.random() * (max - min)
         val randomY: Double = min + Math.random() * (max - min)
 
-        this.movVec.set(randomX.toFloat(), randomY.toFloat())
+//        this.movVec.set(randomX.toFloat(), randomY.toFloat())
     }
 
     override fun update() {

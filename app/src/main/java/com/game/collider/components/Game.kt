@@ -4,9 +4,7 @@ import android.content.Context
 import android.graphics.*
 import android.view.MotionEvent
 import com.game.collider.R
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.math.*
 
 class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop {
     enum class STATE { END, PAUSED, STARTED }
@@ -33,13 +31,10 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
 //            players[1].location.centerX() - ball.location.centerX(),
 //            players[1].location.bottom
 //        )
-        val min = 0f
+        val min = 30f
         val randomWidth: Double = min + Math.random() * (bounds.width() - min)
         val randomHeight: Double = min + Math.random() * (bounds.height() - min)
-        ball.location.offset(ball.location.left, randomWidth.toFloat())
-        ball.location.offset(ball.location.top, randomHeight.toFloat())
-        ball.location.offset(ball.location.right, 0f)
-        ball.location.offset(ball.location.bottom, 0f)
+        ball.location.offset(randomWidth.toFloat(), randomHeight.toFloat())
         println(ball.location)
     }
 
@@ -57,21 +52,23 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
     }
 
     fun orent() {
-        val rotationAmount = 0.01
+        val rotationAmount = 0.025
         val deltaY = ball.centerY - bounds.exactCenterY()
         val deltaX = ball.centerX - bounds.exactCenterX()
         ball.deltaCenter.bottom = bounds.exactCenterY()
         ball.deltaCenter.right = bounds.exactCenterX()
         var theta = atan2(deltaY, deltaX).toDouble()
+
         if (deltaX < 0 && deltaY < 0) {
             theta += 3 * Math.PI / 2
         } else {
             theta -= Math.PI / 2
         }
-        val thetaDegrees = Math.toDegrees(theta)
 
+        val thetaDegrees = Math.toDegrees(theta)
         var heading = ""
         var centerDirection = ""
+
         if (orientation > Math.PI) {
             orientation = -Math.PI + (orientation - Math.PI)
         }
@@ -85,45 +82,45 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
                 } else {
                     orientation += rotationAmount
                 }
-                heading = "┘"
+                heading = "Quadrant IV"
             } else if (orientation <= Math.PI / 2 && orientation >= 0) {
                 orientation += rotationAmount
-                heading = "┐"
+                heading = "Quadrant I"
             } else if (orientation <= 0 && orientation >= -Math.PI / 2) {
                 if (-1 * (Math.PI - theta) > -Math.PI / 4) {
                     orientation += rotationAmount
                 } else {
                     orientation -= rotationAmount
                 }
-                heading = "┌"
+                heading = "Quadrant II"
             } else if (orientation <= -Math.PI / 2) {
                 orientation -= rotationAmount
-                heading = "└"
+                heading = "Quadrant III"
             }
-            centerDirection = "┌"
+            centerDirection = "Quadrant II"
         } else if (deltaX > 0 && deltaY < 0) {
             if (orientation >= Math.PI / 2) {
                 orientation += rotationAmount
-                heading = "┘"
+                heading = "Quadrant IV"
             } else if (orientation <= Math.PI / 2 && orientation >= 0) {
                 if (Math.PI - (-theta) > Math.PI / 4) {
                     orientation -= rotationAmount
                 } else {
                     orientation += rotationAmount
                 }
-                heading = "┐"
+                heading = "Quadrant I"
             } else if (orientation <= 0 && orientation >= -Math.PI / 2) {
                 orientation -= rotationAmount
-                heading = "┌"
+                heading = "Quadrant II"
             } else if (orientation <= -Math.PI / 2) {
                 if (orientation < theta) {
                     orientation += rotationAmount
                 } else {
                     orientation -= rotationAmount
                 }
-                heading = "└"
+                heading = "Quadrant III"
             }
-            centerDirection = "┐"
+            centerDirection = "Quadrant I"
         } else if (deltaX > 0 && deltaY > 0) {
             if (orientation >= Math.PI / 2) {
                 if (-1 * (Math.PI - theta) > -Math.PI / 4) {
@@ -131,75 +128,67 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
                 } else {
                     orientation -= rotationAmount
                 }
-                heading = "┘"
+                heading = "Quadrant IV"
             } else if (orientation <= Math.PI / 2 && orientation >= 0) {
                 orientation -= rotationAmount
-                heading = "┐"
+                heading = "Quadrant I"
             } else if (orientation <= 0 && orientation >= -Math.PI / 2) {
                 if (orientation > theta) {
                     orientation -= rotationAmount
                 } else {
                     orientation += rotationAmount
                 }
-                heading = "┌"
+                heading = "Quadrant II"
             } else if (orientation <= -Math.PI / 2) {
                 orientation += rotationAmount
-                heading = "└"
+                heading = "Quadrant III"
             }
-            centerDirection = "┘"
+            centerDirection = "Quadrant IV"
         } else if (deltaX < 0 && deltaY > 0) {
             if (orientation >= Math.PI / 2) {
                 orientation -= rotationAmount
-                heading = "┘"
+                heading = "Quadrant IV"
             } else if (orientation <= Math.PI / 2 && orientation >= 0) {
                 if (orientation > theta) {
                     orientation -= rotationAmount
                 } else {
                     orientation += rotationAmount
                 }
-                heading = "┐"
+                heading = "Quadrant I"
             } else if (orientation <= 0 && orientation >= -Math.PI / 2) {
                 orientation += rotationAmount
-                heading = "┌"
+                heading = "Quadrant II"
             } else if (orientation <= -Math.PI / 2) {
                 if (Math.PI - (-theta) > Math.PI / 4) {
                     orientation += rotationAmount
                 } else {
                     orientation -= rotationAmount
                 }
-                heading = "└"
+                heading = "Quadrant III"
             }
-            centerDirection = "└"
+            centerDirection = "Quadrant III"
         }
 
-        val velocityScalar = 0.01
+        val velocityScalar = 1
         val horzComp = cos(orientation) * velocityScalar
         val vertComp = sin(orientation) * velocityScalar
+        val ts = 1.5f
         when (heading) {
-            "└" -> {
-                ball.movVec.x = horzComp.toFloat()
-                ball.movVec.y = vertComp.toFloat()
+            "Quadrant I" -> {
+                ball.movVec.set(ts, -ts)
             }
-            "┌" -> {
-                ball.movVec.x = -horzComp.toFloat()
-                ball.movVec.y = vertComp.toFloat()
+            "Quadrant II" -> {
+                ball.movVec.set(-ts, -ts)
             }
-            "┘" -> {
-                ball.movVec.x = horzComp.toFloat()
-                ball.movVec.y = vertComp.toFloat()
+            "Quadrant III" -> {
+                ball.movVec.set(-ts, ts)
             }
-            "┐" -> {
-                ball.movVec.x = horzComp.toFloat()
-                ball.movVec.y = vertComp.toFloat()
+            "Quadrant IV" -> {
+                ball.movVec.set(ts, ts)
             }
         }
 
-        println(" $centerDirection $heading  theta: $theta, orient: $orientation")
-        println("horzComp: $horzComp   vertComp: $vertComp")
-
-
         val orientationDegrees = Math.toDegrees(orientation)
-
         val matrix = Matrix()
         matrix.postRotate(orientationDegrees.toFloat())
         val rotatedBitmap = Bitmap.createBitmap(
@@ -211,6 +200,7 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
             matrix,
             true
         )
+
         ball.shape = rotatedBitmap
     }
 
@@ -235,17 +225,19 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
             if (ball.location.left <= 0 || ball.location.right >= o.right) {
                 ball.movVec.x = -ball.movVec.x
                 if (ball.location.left <= 0) {
-                    ball.location.offset(-ball.location.left, 0f)
-                } else {
-                    ball.location.offset(o.right - ball.location.right, 0f)
+                    ball.location.offset(1f, 0f)
+                }
+                if (ball.location.right >= o.right) {
+                    ball.location.offset(-1f, 0f)
                 }
             }
             if (ball.location.top <= 0 || ball.location.bottom >= o.bottom) {
                 ball.movVec.y = -ball.movVec.y
                 if (ball.location.top <= 0) {
-                    ball.location.offset(-ball.location.top, 0f)
-                } else {
-                    ball.location.offset(o.bottom - ball.location.bottom, 0f)
+                    ball.location.offset(0f, 1f)
+                }
+                if (ball.location.bottom >= o.bottom) {
+                    ball.location.offset(0f, -1f)
                 }
 //                if (ball.location.top <= 0) {
 //                    players[0].score++

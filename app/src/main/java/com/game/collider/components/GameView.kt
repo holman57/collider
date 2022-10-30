@@ -72,7 +72,6 @@ class GameView(context: Context?) : SurfaceView(context), SurfaceHolder.Callback
                 update()
             }
             render()
-//            println("stuff")
         }
     }
 

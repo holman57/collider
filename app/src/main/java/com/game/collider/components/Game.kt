@@ -5,6 +5,7 @@ import android.graphics.*
 import android.view.MotionEvent
 import com.game.collider.R
 import kotlin.math.*
+import kotlin.random.Random
 
 class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop {
     enum class STATE { END, PAUSED, STARTED }
@@ -15,7 +16,7 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
     var ball_sprite = R.drawable.ball
     var ball: Ball = Ball(context, ball_sprite)
     var orbital_bmp = BitmapFactory.decodeResource(context.resources, ball_sprite)
-    var orientation = 0.0
+    var orientation = Math.toRadians(Random.nextInt(0, 360).toDouble())
 //    var players: Array<Player> = arrayOf(
 //        Player(context, R.drawable.button),
 //        if (vsAI) BotPlayer(context, R.drawable.button, this) else
@@ -34,8 +35,8 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
         val min = 30f
         val randomWidth: Double = min + Math.random() * (bounds.width() - min)
         val randomHeight: Double = min + Math.random() * (bounds.height() - min)
-        ball.location.offset(randomWidth.toFloat(), randomHeight.toFloat())
-        println(ball.location)
+//        ball.location.offset(randomWidth.toFloat(), randomHeight.toFloat())
+        ball.location.offset(300f, 300f)
     }
 
     override fun render(canvas: Canvas?) {
@@ -67,7 +68,6 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
 
         val thetaDegrees = Math.toDegrees(theta)
         var heading = ""
-        var centerDirection = ""
 
         if (orientation > Math.PI) {
             orientation = -Math.PI + (orientation - Math.PI)
@@ -75,6 +75,7 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
         if (orientation < -Math.PI) {
             orientation = Math.PI + (orientation + Math.PI)
         }
+
         if (deltaX < 0 && deltaY < 0) {
             if (orientation >= Math.PI / 2) {
                 if (orientation > theta) {
@@ -88,16 +89,15 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
                 heading = "Quadrant I"
             } else if (orientation <= 0 && orientation >= -Math.PI / 2) {
                 if (-1 * (Math.PI - theta) > -Math.PI / 4) {
-                    orientation += rotationAmount
-                } else {
                     orientation -= rotationAmount
+                } else {
+                    orientation += rotationAmount
                 }
                 heading = "Quadrant II"
             } else if (orientation <= -Math.PI / 2) {
                 orientation -= rotationAmount
                 heading = "Quadrant III"
             }
-            centerDirection = "Quadrant II"
         } else if (deltaX > 0 && deltaY < 0) {
             if (orientation >= Math.PI / 2) {
                 orientation += rotationAmount
@@ -120,7 +120,6 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
                 }
                 heading = "Quadrant III"
             }
-            centerDirection = "Quadrant I"
         } else if (deltaX > 0 && deltaY > 0) {
             if (orientation >= Math.PI / 2) {
                 if (-1 * (Math.PI - theta) > -Math.PI / 4) {
@@ -143,7 +142,6 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
                 orientation += rotationAmount
                 heading = "Quadrant III"
             }
-            centerDirection = "Quadrant IV"
         } else if (deltaX < 0 && deltaY > 0) {
             if (orientation >= Math.PI / 2) {
                 orientation -= rotationAmount
@@ -166,27 +164,40 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
                 }
                 heading = "Quadrant III"
             }
-            centerDirection = "Quadrant III"
         }
 
         val velocityScalar = 1
         val horzComp = cos(orientation) * velocityScalar
         val vertComp = sin(orientation) * velocityScalar
+        println("orientation: (cos):$horzComp (sin):$vertComp")
         val ts = 1.5f
         when (heading) {
             "Quadrant I" -> {
-                ball.movVec.set(ts, -ts)
+                ball.movVec.set(-horzComp.toFloat(), vertComp.toFloat())
             }
             "Quadrant II" -> {
-                ball.movVec.set(-ts, -ts)
+                ball.movVec.set(-horzComp.toFloat(), -vertComp.toFloat())
             }
             "Quadrant III" -> {
-                ball.movVec.set(-ts, ts)
+                ball.movVec.set(-horzComp.toFloat(), vertComp.toFloat())
             }
             "Quadrant IV" -> {
-                ball.movVec.set(ts, ts)
+                ball.movVec.set(horzComp.toFloat(), -vertComp.toFloat())
             }
+//            "Quadrant I" -> {
+//                ball.movVec.set(ts, -ts)
+//            }
+//            "Quadrant II" -> {
+//                ball.movVec.set(-ts, -ts)
+//            }
+//            "Quadrant III" -> {
+//                ball.movVec.set(-ts, ts)
+//            }
+//            "Quadrant IV" -> {
+//                ball.movVec.set(ts, ts)
+//            }
         }
+        println("$heading: Δ($deltaX, $deltaY)")
 
         val orientationDegrees = Math.toDegrees(orientation)
         val matrix = Matrix()

@@ -35,8 +35,8 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
         val min = 30f
         val randomWidth: Double = min + Math.random() * (bounds.width() - min)
         val randomHeight: Double = min + Math.random() * (bounds.height() - min)
-//        ball.location.offset(randomWidth.toFloat(), randomHeight.toFloat())
-        ball.location.offset(300f, 300f)
+        ball.location.offset(randomWidth.toFloat(), randomHeight.toFloat())
+//        ball.location.offset(300f, 300f)
     }
 
     override fun render(canvas: Canvas?) {
@@ -53,7 +53,7 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
     }
 
     fun orent() {
-        val rotationAmount = 0.025
+        val rotationAmount = 0.11 + (Math.random() / 16)
         val deltaY = ball.centerY - bounds.exactCenterY()
         val deltaX = ball.centerX - bounds.exactCenterX()
         ball.deltaCenter.bottom = bounds.exactCenterY()
@@ -139,7 +139,7 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
                 }
                 heading = "Quadrant II"
             } else if (orientation <= -Math.PI / 2) {
-                orientation += rotationAmount
+                orientation -= rotationAmount
                 heading = "Quadrant III"
             }
         } else if (deltaX < 0 && deltaY > 0) {
@@ -166,38 +166,17 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
             }
         }
 
-        val velocityScalar = 1
+        val velocityScalar = 1 + Math.random() * 20
         val horzComp = cos(orientation) * velocityScalar
         val vertComp = sin(orientation) * velocityScalar
-        println("orientation: (cos):$horzComp (sin):$vertComp")
-        val ts = 1.5f
-        when (heading) {
-            "Quadrant I" -> {
-                ball.movVec.set(-horzComp.toFloat(), vertComp.toFloat())
-            }
-            "Quadrant II" -> {
-                ball.movVec.set(-horzComp.toFloat(), -vertComp.toFloat())
-            }
-            "Quadrant III" -> {
-                ball.movVec.set(-horzComp.toFloat(), vertComp.toFloat())
-            }
-            "Quadrant IV" -> {
-                ball.movVec.set(horzComp.toFloat(), -vertComp.toFloat())
-            }
-//            "Quadrant I" -> {
-//                ball.movVec.set(ts, -ts)
-//            }
-//            "Quadrant II" -> {
-//                ball.movVec.set(-ts, -ts)
-//            }
-//            "Quadrant III" -> {
-//                ball.movVec.set(-ts, ts)
-//            }
-//            "Quadrant IV" -> {
-//                ball.movVec.set(ts, ts)
-//            }
-        }
-        println("$heading: Δ($deltaX, $deltaY)")
+        ball.movVec.set(vertComp.toFloat(), -horzComp.toFloat())
+//        println("orientation: (cos):$horzComp (sin):$vertComp")
+//        when (heading) {
+//            "Quadrant I" -> {}
+//            "Quadrant II" -> {}
+//            "Quadrant III" -> {}
+//            "Quadrant IV" -> {}
+//        println("$heading: Δ($deltaX, $deltaY)")
 
         val orientationDegrees = Math.toDegrees(orientation)
         val matrix = Matrix()
@@ -218,6 +197,9 @@ class Game(context: Context, vsAI: Boolean = true, var bounds: Rect) : GameLoop 
 
     fun processInput(o: Any?) {
         if (o is MotionEvent) {
+            val x = o.x
+            val y = o.y
+            println("($x, $y)")
 //            if (o.y > bounds.exactCenterY()) {
 //                players[0].location.offsetTo(o.x, players[0].location.top)
 //            } else if (players[1] !is BotPlayer) {
